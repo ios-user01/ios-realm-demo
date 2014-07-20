@@ -1,0 +1,12 @@
+platform :ios, "7.0"
+
+target "Realm-Demo" do
+
+pod 'Realm'
+
+end
+
+target "Realm-DemoTests" do
+
+end
+
