@@ -20,3 +20,5 @@ DerivedData
 # CocoaPods
 Pods/
 
+# Realm-Demo
+Realm-Demo.xcworkspace/
