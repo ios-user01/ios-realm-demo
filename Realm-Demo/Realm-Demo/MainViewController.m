@@ -37,14 +37,6 @@
 
 @implementation MainViewController
 
-#pragma mark - View Lifecycle
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    [self _insertNewCoreDataArtist];
-}
-
 #pragma mark - IBActions
 
 - (IBAction)_startButtonTapped:(UIButton *)sender {
@@ -61,11 +53,15 @@
     
     NSDate *coreDataStartDate = [NSDate date];
     self.coreDataStartLabel.text = coreDataStartDate.description;
-    
+
+    DataSource *ds = [DataSource sharedDataSource];
+    NSEntityDescription *entityDescription = [NSEntityDescription entityForName:@"Artist" inManagedObjectContext:ds.managedObjectContext];
     for (int i = 0; i < nbInserts; i++) {
-        [self _insertNewCoreDataArtist];
-        NSLog(@"[%@:%d] %@ | %@", NSStringFromClass(self.class), __LINE__, NSStringFromSelector(_cmd), @"Inserting artist into Core Data");
+        Artist *artist = [NSEntityDescription insertNewObjectForEntityForName:entityDescription.name inManagedObjectContext:ds.managedObjectContext];
+        artist.name = @"James Sullivan";
+        artist.identifier = @"The Rev";
     }
+    [ds saveContext];
     
     NSDate *coreDataEndDate = [NSDate date];
     NSTimeInterval coreDataTimeInterval = [coreDataEndDate timeIntervalSinceDate:coreDataStartDate];
@@ -77,11 +73,16 @@
     
     NSDate *realmStartDate = [NSDate date];
     self.realmStartLabel.text = realmStartDate.description;
-    
+
+    RLMRealm *realm = [RLMRealm defaultRealm];
+    [realm beginWriteTransaction];
     for (int i = 0; i < nbInserts; i++) {
-        [self _insertNewRealArtist];
-        NSLog(@"[%@:%d] %@ | %@", NSStringFromClass(self.class), __LINE__, NSStringFromSelector(_cmd), @"Inserting artist into Realm");
+        RealmArtist *artist = [[RealmArtist alloc] init];
+        artist.name = @"James Sullivan";
+        artist.identifier = @"The Rev";
+        [realm addObject:artist];
     }
+    [realm commitWriteTransaction];
     
     NSDate *realmEndDate = [NSDate date];
     NSTimeInterval realmTimeInterval = [realmEndDate timeIntervalSinceDate:realmStartDate];
@@ -93,27 +94,5 @@
     
     sender.enabled = YES;
 }
-
-#pragma mark - Core Data
-
-- (void)_insertNewCoreDataArtist {
-    DataSource *ds = [DataSource sharedDataSource];
-    NSEntityDescription *entityDescription = [NSEntityDescription entityForName:@"Artist" inManagedObjectContext:ds.managedObjectContext];
-    Artist *artist = [NSEntityDescription insertNewObjectForEntityForName:entityDescription.name inManagedObjectContext:ds.managedObjectContext];
-    artist.name = @"James Sullivan";
-    artist.identifier = @"The Rev";
-    [ds saveContext];
-}
-
-- (void)_insertNewRealArtist {
-    RLMRealm *realm = [RLMRealm defaultRealm];
-    [realm beginWriteTransaction];
-    RealmArtist *artist = [[RealmArtist alloc] init];
-    artist.name = @"James Sullivan";
-    artist.identifier = @"The Rev";
-    [realm addObject:artist];
-    [realm commitWriteTransaction];
-}
-
 
 @end
